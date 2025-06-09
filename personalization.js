@@ -537,9 +537,15 @@ async function pickUser2ItemStrategyAndFetchRecommendations() {
 }
 
 // Fisher-Yates shuffle algorithm for efficient array shuffling
+// This algorithm ensures each permutation has equal probability
+// Time complexity: O(n) where n is the array length
+// Space complexity: O(1) as it shuffles in-place
 function shuffleArray(array) {
+  // Start from the last element and work backwards
   for (let i = array.length - 1; i > 0; i--) {
+    // Generate a random index between 0 and i (inclusive)
     const j = Math.floor(Math.random() * (i + 1));
+    // Swap elements at indices i and j
     [array[i], array[j]] = [array[j], array[i]];
   }
   return array;
@@ -559,19 +565,22 @@ async function fetchColdStart() {
   ];
   let mergedArray = [];
 
-  // Create a set of keys that are in keyOrder
+  // Create a set of keys that are in keyOrder for efficient lookup
   const keyOrderSet = new Set(keyOrder);
 
-  // Merge arrays based on keyOrder
+  // First pass: Process categories in the specified order
+  // This ensures categories appear in the desired sequence
   keyOrder.forEach((key) => {
     if (userToItem[key]) {
-      // Shuffle each category's items before adding to merged array
+      // Create a copy of the array to avoid modifying the original
+      // Shuffle items within this category before adding to merged array
       const shuffledItems = shuffleArray([...userToItem[key]]);
       mergedArray = mergedArray.concat(shuffledItems);
     }
   });
 
-  // Merge arrays for the rest of the keys
+  // Second pass: Process any remaining categories not in keyOrder
+  // These categories will appear after the ordered ones
   Object.keys(userToItem).forEach((key) => {
     if (!keyOrderSet.has(key)) {
       // Shuffle remaining categories' items before adding to merged array
